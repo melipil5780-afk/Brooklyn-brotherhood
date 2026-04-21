@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Brooklyn Brotherhood</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:          #09090c;
+  --surface:     #111218;
+  --panel:       #181b22;
+  --panel2:      #1e2129;
+  --border:      rgba(220,195,140,0.07);
+  --border2:     rgba(220,195,140,0.14);
+  --brass:       #c49a2a;
+  --brass-soft:  rgba(196,154,42,0.16);
+  --brass-glow:  rgba(196,154,42,0.06);
+  --brass-dim:   rgba(196,154,42,0.55);
+  --forest:      #3a7a52;
+  --forest-soft: rgba(58,122,82,0.15);
+  --steel:       #4a6e94;
+  --steel-soft:  rgba(74,110,148,0.15);
+  --cream:       #ede4d0;
+  --muted:       rgba(237,228,208,0.45);
+  --muted2:      rgba(237,228,208,0.22);
+  --warn:        #a84030;
+  --warn-soft:   rgba(168,64,48,0.12);
+  --r:           6px;
+  --r2:          12px;
+  --nav-h:       calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.55;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 999; opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ── PASSWORD GATE ── */
+#gate-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+#gate-overlay::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(196,154,42,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+#gate-overlay.unlocked { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.gate-card {
+  width: 100%; max-width: 340px;
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  animation: gateRise 0.6s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes gateRise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gate-flame { font-size: 1rem; letter-spacing: 0.5em; margin-bottom: 1.3rem; opacity: 0.55; }
+.gate-title { font-family: 'Lora', serif; font-size: clamp(1.55rem,6.5vw,2.1rem); font-weight: 700; text-align: center; line-height: 1.1; color: var(--cream); margin-bottom: 0.35rem; }
+.gate-title em { font-style: normal; color: var(--brass); }
+.gate-sub { font-size: 0.62rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-bottom: 2rem; text-align: center; }
+.gate-rule { width: 48px; height: 1px; background: linear-gradient(to right, transparent, var(--brass-dim), transparent); margin-bottom: 2rem; }
+.gate-lbl { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); align-self: flex-start; margin-bottom: 0.45rem; width: 100%; }
+.gate-input {
+  width: 100%; background: var(--panel); border: 1px solid var(--border2); border-radius: var(--r);
+  padding: 0.88rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--cream);
+  letter-spacing: 0.1em; margin-bottom: 0.65rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-text-security: disc; text-security: disc;
+  /* fallback for browsers that don't support text-security */
+  type: password;
+}
+.gate-input::placeholder { color: var(--muted2); letter-spacing: 0.04em; font-size: 0.85rem; }
+.gate-input:focus { outline: none; border-color: var(--brass); box-shadow: 0 0 0 3px rgba(196,154,42,0.1); }
+.gate-input.shake { animation: shake 0.38s both; border-color: var(--warn) !important; }
+@keyframes shake {
+  10%,90%  { transform: translateX(-2px); }
+  20%,80%  { transform: translateX(3px); }
+  30%,50%,70% { transform: translateX(-4px); }
+  40%,60%  { transform: translateX(4px); }
+}
+.gate-error { font-size: 0.72rem; color: #e07060; margin-bottom: 0.65rem; min-height: 1em; text-align: center; width: 100%; }
+.gate-btn { width: 100%; padding: 0.9rem; background: var(--brass); color: #09090c; border: none; border-radius: var(--r); font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: opacity 0.14s, transform 0.14s; }
+.gate-btn:hover { opacity: 0.9; }
+.gate-btn:active { transform: scale(0.98); }
+.gate-hint { margin-top: 1.6rem; font-size: 0.66rem; color: var(--muted2); text-align: center; line-height: 1.7; }
+
+/* ── HEADER ── */
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 1.3rem 1.2rem 1.15rem;
+  text-align: center; position: relative; overflow: hidden;
+}
+.site-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 160% at 50% -20%, rgba(196,154,42,0.07) 0%, transparent 70%); pointer-events: none; }
+.site-header::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, transparent, var(--brass), transparent); opacity: 0.5; }
+.header-flame { font-size: 0.95rem; letter-spacing: 0.4em; margin-bottom: 0.4rem; opacity: 0.55; }
+.site-title { font-family: 'Lora', serif; font-size: clamp(1.5rem,5.5vw,2.4rem); font-weight: 700; line-height: 1; color: var(--cream); }
+.site-title em { font-style: normal; color: var(--brass); }
+.site-tagline { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-top: 0.38rem; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border2);
+  display: flex; z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.bnav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: 9px 2px 8px;
+  background: none; border: none; color: var(--muted2);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: 0.55rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  transition: color 0.15s; -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.bnav-btn .nav-icon { font-size: 1.22rem; line-height: 1; transition: transform 0.2s cubic-bezier(.34,1.56,.64,1); }
+.bnav-btn.active { color: var(--brass); }
+.bnav-btn.active::before { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px; background: var(--brass); border-radius: 0 0 3px 3px; }
+.bnav-btn.active .nav-icon { transform: scale(1.15) translateY(-1px); }
+
+/* ── LAYOUT ── */
+main { max-width: 640px; margin: 0 auto; padding: 1.1rem 0.9rem var(--nav-h); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; animation: riseIn 0.2s ease both; }
+@keyframes riseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-header { margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-end; gap: 0.5rem; }
+.page-title { font-family: 'Lora', serif; font-size: 1.65rem; font-weight: 700; color: var(--cream); line-height: 1; flex: 1; }
+.page-sub { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); opacity: 0.85; padding-bottom: 0.08rem; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r2); padding: 1rem 1.1rem; margin-bottom: 0.8rem; }
+.card-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass); margin-bottom: 0.55rem; }
+
+/* ── HOME ── */
+.hero-card { background: linear-gradient(150deg, #181410 0%, #0e0b07 100%); border: 1px solid rgba(196,154,42,0.18); border-radius: var(--r2); padding: 1.1rem 1.2rem; margin-bottom: 0.9rem; position: relative; overflow: hidden; }
+.hero-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 80% at 90% 50%, rgba(196,154,42,0.05) 0%, transparent 70%); pointer-events: none; }
+.hero-card::after { content: '🔥'; position: absolute; right: 0.9rem; bottom: 0.2rem; font-size: 3.8rem; opacity: 0.05; line-height: 1; pointer-events: none; filter: grayscale(1); }
+
+.schedule-list { display: flex; flex-direction: column; }
+.schedule-row { display: flex; align-items: flex-start; gap: 0.72rem; padding: 0.48rem 0; border-bottom: 1px solid var(--border); }
+.schedule-row:last-child { border-bottom: none; }
+.s-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 0.2rem; }
+.s-name { font-weight: 500; color: var(--cream); font-size: 0.87rem; }
+.s-detail { font-size: 0.7rem; color: var(--muted); margin-top: 0.05rem; }
+
+.qa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.42rem; margin-bottom: 0.85rem; }
+.qa-btn { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r2); padding: 0.85rem 0.25rem 0.72rem; display: flex; flex-direction: column; align-items: center; gap: 0.32rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: border-color 0.14s, background 0.14s; -webkit-tap-highlight-color: transparent; }
+.qa-btn:active { border-color: rgba(196,154,42,0.4); background: var(--brass-glow); transform: scale(0.97); }
+.qa-icon { font-size: 1.3rem; line-height: 1; }
+.qa-label { font-size: 0.58rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); text-align: center; }
+
+.alert-box { background: var(--warn-soft); border: 1px solid rgba(168,64,48,0.22); border-radius: var(--r); padding: 0.82rem 0.95rem; font-size: 0.78rem; line-height: 1.62; color: #e8bfaa; }
+.alert-box strong { color: #f0d0c0; }
+
+.info-box { background: var(--brass-glow); border: 1px solid rgba(196,154,42,0.11); border-radius: var(--r); padding: 0.82rem 0.95rem; font-size: 0.78rem; line-height: 1.65; color: var(--muted); margin-bottom: 0.8rem; }
+.info-box strong { color: var(--cream); font-weight: 500; }
+
+/* ── MEMBERS ── */
+.member-list { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; margin-bottom: 1.2rem; }
+.member-item { border-bottom: 1px solid var(--border); }
+.member-item:last-child { border-bottom: none; }
+
+.member-row { display: flex; align-items: center; gap: 0.8rem; padding: 0.85rem 1rem; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background 0.12s; user-select: none; }
+.member-row:hover, .member-item.open .member-row { background: rgba(196,154,42,0.04); }
+
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--brass-soft); border: 2px solid rgba(196,154,42,0.2); color: var(--brass); font-family: 'Lora', serif; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.14s, border-color 0.14s; }
+.member-item.open .avatar { background: rgba(196,154,42,0.25); border-color: var(--brass); }
+.avatar-visitor { background: var(--steel-soft); border-color: rgba(74,110,148,0.28); color: var(--steel); }
+
+.member-meta { flex: 1; min-width: 0; }
+.member-name { font-size: 0.9rem; font-weight: 500; color: var(--cream); }
+.member-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.04rem; }
+
+.member-badges { display: flex; gap: 0.28rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+.badge { font-size: 0.54rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.17rem 0.38rem; border-radius: 3px; }
+.badge-brass   { background: var(--brass-soft);  color: var(--brass);   border: 1px solid rgba(196,154,42,0.2); }
+.badge-forest  { background: var(--forest-soft); color: var(--forest);  border: 1px solid rgba(58,122,82,0.22); }
+.badge-muted   { background: rgba(237,228,208,0.06); color: var(--muted); border: 1px solid var(--border2); }
+.badge-visitor { background: var(--steel-soft);  color: var(--steel);   border: 1px solid rgba(74,110,148,0.2); }
+
+.chevron { color: var(--muted2); font-size: 0.68rem; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+.member-item.open .chevron { transform: rotate(90deg); color: var(--brass); }
+
+.contact-panel { display: none; background: rgba(196,154,42,0.02); border-top: 1px solid var(--border); }
+.member-item.open .contact-panel { display: block; }
+
+.cp-row { display: flex; gap: 0.55rem; padding: 0.46rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.78rem; }
+.cp-row:last-child { border-bottom: none; }
+.cp-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); min-width: 76px; padding-top: 0.1rem; flex-shrink: 0; }
+.cp-value { color: rgba(237,228,208,0.8); line-height: 1.5; }
+.cp-value a { color: var(--brass); text-decoration: none; }
+.cp-value a:hover { text-decoration: underline; }
+
+.member-actions { display: flex; gap: 0.5rem; padding: 0.6rem 1rem; border-top: 1px solid var(--border); }
+.member-action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.52rem 0.5rem; border-radius: var(--r); font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; cursor: pointer; border: 1px solid; transition: background 0.13s; -webkit-tap-highlight-color: transparent; }
+.action-call  { background: var(--forest-soft); border-color: rgba(58,122,82,0.3);  color: var(--forest); }
+.action-call:hover  { background: rgba(58,122,82,0.25); }
+.action-text  { background: var(--brass-soft);  border-color: rgba(196,154,42,0.3); color: var(--brass); }
+.action-text:hover  { background: rgba(196,154,42,0.25); }
+.action-email { background: rgba(237,228,208,0.06); border-color: var(--border2); color: var(--muted); }
+.action-email:hover { background: rgba(237,228,208,0.1); }
+
+/* ── DOCS ── */
+.doc-section-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 1rem 0 0.42rem; }
+.doc-section-label:first-child { margin-top: 0; }
+.doc-link { display: flex; align-items: center; gap: 0.78rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 0.78rem 0.9rem; margin-bottom: 0.38rem; text-decoration: none; color: var(--cream); transition: border-color 0.13s, background 0.13s; }
+.doc-link:hover { border-color: rgba(196,154,42,0.28); background: var(--brass-glow); }
+.doc-icon-wrap { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
+.di-sheet { background: rgba(52,168,83,0.14); }
+.di-doc   { background: rgba(66,133,244,0.14); }
+.di-agree { background: var(--brass-soft); }
+.di-fire  { background: rgba(196,154,42,0.1); }
+.doc-info { flex: 1; min-width: 0; }
+.doc-name { font-size: 0.83rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-desc { font-size: 0.67rem; color: var(--muted); margin-top: 0.08rem; }
+.doc-arrow { color: var(--muted2); font-size: 0.7rem; flex-shrink: 0; }
+
+/* ── ROLES ── */
+.role-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r2); padding: 1rem 1.1rem; margin-bottom: 0.62rem; }
+.role-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.42rem; }
+.role-name { font-family: 'Lora', serif; font-size: 1rem; font-weight: 600; color: var(--cream); line-height: 1.2; }
+.role-term { font-size: 0.57rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass); background: var(--brass-soft); padding: 0.2rem 0.45rem; border-radius: 3px; white-space: nowrap; margin-top: 0.18rem; flex-shrink: 0; }
+.role-desc { font-size: 0.77rem; line-height: 1.62; color: rgba(237,228,208,0.6); }
+.role-holder { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--forest); margin-top: 0.52rem; font-weight: 500; }
+.role-holder-name { color: var(--cream); }
+.role-vacant { color: var(--muted); font-style: italic; }
+
+/* ── CHECKLIST ── */
+.progress-wrap { background: var(--border); border-radius: 100px; height: 4px; margin-bottom: 1rem; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(to right, var(--brass), #e0b840); border-radius: 100px; transition: width 0.35s cubic-bezier(.4,0,.2,1); width: 0%; }
+.cl-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; margin-bottom: 0.8rem; }
+.cl-item { display: flex; align-items: flex-start; gap: 0.82rem; padding: 0.82rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background 0.12s; user-select: none; }
+.cl-item:last-child { border-bottom: none; }
+.cl-item:hover { background: rgba(196,154,42,0.03); }
+.cl-box { width: 22px; height: 22px; border: 2px solid var(--border2); border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.18s; margin-top: 1px; font-size: 0.7rem; color: transparent; }
+.cl-item.done .cl-box { background: var(--forest); border-color: var(--forest); color: white; font-weight: 700; }
+.cl-text { font-size: 0.83rem; line-height: 1.5; color: var(--cream); }
+.cl-item.done .cl-text { text-decoration: line-through; color: var(--muted); }
+.progress-label { text-align: center; font-size: 0.75rem; color: var(--muted); margin: 0.45rem 0 0.9rem; min-height: 1.3em; transition: color 0.3s; }
+.btn-ghost { padding: 0.55rem 1.1rem; background: none; border: 1px solid var(--border2); border-radius: var(--r); font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); cursor: pointer; transition: border-color 0.13s, color 0.13s; display: block; margin: 0 auto; -webkit-tap-highlight-color: transparent; }
+.btn-ghost:hover { border-color: var(--brass); color: var(--brass); }
+
+/* ── DUES ── */
+.dues-hero { background: linear-gradient(145deg, #1a1408 0%, #0f0c05 100%); border: 1px solid rgba(196,154,42,0.24); border-radius: var(--r2); padding: 1.3rem 1.2rem; margin-bottom: 0.9rem; position: relative; overflow: hidden; }
+.dues-hero::after { content: '$35'; position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); font-family: 'Lora', serif; font-size: 5rem; font-weight: 700; color: rgba(196,154,42,0.07); line-height: 1; pointer-events: none; }
+.dues-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass); margin-bottom: 0.32rem; }
+.dues-amount { font-family: 'Lora', serif; font-size: 2.4rem; font-weight: 700; color: var(--cream); line-height: 1; }
+.dues-name { font-size: 0.74rem; color: var(--muted); margin-top: 0.28rem; }
+.zelle-row { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 0.82rem 0.9rem; display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+.zelle-badge { width: 38px; height: 38px; background: #6200ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: white; flex-shrink: 0; }
+.zelle-info .zl { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.zelle-info .zv { font-size: 0.92rem; font-weight: 500; color: var(--cream); margin-top: 0.08rem; }
+.btn-copy { margin-left: auto; padding: 0.34rem 0.72rem; background: none; border: 1px solid var(--border2); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 500; cursor: pointer; color: var(--muted); transition: border-color 0.13s, color 0.13s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.btn-copy:hover { border-color: var(--brass); color: var(--brass); }
+
+/* ── KING EMAIL ── */
+.secretary-steps { background: var(--panel); border: 1px solid rgba(196,154,42,0.16); border-radius: var(--r2); padding: 1rem 1.1rem; margin-bottom: 1rem; }
+.step-row { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.step-row:last-child { border-bottom: none; padding-bottom: 0; }
+.step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--brass-soft); border: 1px solid rgba(196,154,42,0.25); color: var(--brass); font-size: 0.68rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 0.05rem; }
+.step-text { font-size: 0.8rem; line-height: 1.55; color: var(--cream); }
+.step-note { display: flex; gap: 0.6rem; align-items: flex-start; padding-top: 0.45rem; border-top: 1px solid var(--border); margin-top: 0.45rem; }
+.step-note-text { font-size: 0.74rem; line-height: 1.55; color: var(--muted); }
+
+.k-form { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r2); padding: 1.1rem; margin-bottom: 1rem; }
+.k-section-title { font-family: 'Lora', serif; font-size: 0.95rem; font-weight: 600; color: var(--cream); margin: 0 0 0.75rem; display: flex; align-items: center; gap: 0.48rem; }
+.k-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.field { margin-bottom: 0.72rem; }
+.field label { display: block; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.32rem; }
+.field input, .field textarea { width: 100%; background: var(--panel2); border: 1px solid var(--border2); border-radius: var(--r); padding: 0.68rem 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--cream); transition: border-color 0.14s, box-shadow 0.14s; -webkit-appearance: none; }
+.field textarea { resize: vertical; min-height: 88px; line-height: 1.55; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted2); }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--brass); box-shadow: 0 0 0 3px rgba(196,154,42,0.1); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.72rem; }
+
+.email-preview { background: #101014; border: 1px solid var(--border2); border-radius: var(--r2); overflow: hidden; margin-bottom: 1rem; }
+.email-preview-header { padding: 0.68rem 0.95rem; border-bottom: 1px solid var(--border); background: var(--panel2); }
+.email-preview-label { font-size: 0.58rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); margin-bottom: 0.16rem; }
+.email-preview-subject { font-size: 0.8rem; font-weight: 500; color: var(--cream); }
+.email-preview-body { padding: 0.85rem 0.95rem; font-size: 0.76rem; line-height: 1.72; color: rgba(237,228,208,0.65); white-space: pre-wrap; word-break: break-word; max-height: 260px; overflow-y: auto; }
+.email-preview-body::-webkit-scrollbar { width: 4px; }
+.email-preview-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* King email action buttons */
+.email-actions { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
+.email-btn { display: flex; align-items: center; justify-content: center; gap: 0.52rem; padding: 0.88rem; border-radius: var(--r); font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border: none; transition: opacity 0.14s, transform 0.12s; -webkit-tap-highlight-color: transparent; width: 100%; }
+.email-btn:active { transform: scale(0.98); opacity: 0.88; }
+.email-btn-primary   { background: var(--brass); color: #09090c; }
+.email-btn-secondary { background: transparent; border: 1px solid var(--border2) !important; color: var(--muted); font-size: 0.72rem; }
+.email-btn-secondary:hover { border-color: var(--brass) !important; color: var(--brass); }
+
+/* Share status pill — shows feedback after copy/share */
+.share-status {
+  display: none;
+  align-items: center; justify-content: center; gap: 0.4rem;
+  background: var(--forest-soft); border: 1px solid rgba(58,122,82,0.3);
+  border-radius: var(--r); padding: 0.6rem 1rem;
+  font-size: 0.78rem; font-weight: 500; color: var(--forest);
+  animation: riseIn 0.2s ease both;
+}
+.share-status.visible { display: flex; }
+
+.email-hint { font-size: 0.67rem; color: var(--muted2); text-align: center; margin-top: 0.3rem; line-height: 1.6; }
+.divider { height: 1px; background: var(--border); margin: 1.1rem 0; }
+
+/* ── CALENDAR ── */
+.cal-link { display: flex; align-items: center; gap: 0.78rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 0.82rem 0.9rem; margin-bottom: 0.42rem; text-decoration: none; color: var(--cream); font-size: 0.85rem; transition: border-color 0.13s, background 0.13s; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.cal-link:hover { border-color: rgba(196,154,42,0.28); background: var(--brass-glow); }
+.cal-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
+.ci-gcal  { background: rgba(66,133,244,0.14); }
+.ci-new   { background: rgba(52,168,83,0.14); }
+.ci-gmail { background: rgba(234,67,53,0.14); }
+.ci-king  { background: var(--brass-soft); }
+
+/* ── AGREEMENTS ── */
+.full-doc-btn { display: inline-flex; align-items: center; gap: 0.48rem; background: var(--brass); color: #09090c; text-decoration: none; padding: 0.6rem 1.05rem; border-radius: var(--r); font-size: 0.77rem; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 1rem; transition: opacity 0.13s; }
+.full-doc-btn:hover { opacity: 0.88; }
+.intro-text { font-size: 0.8rem; line-height: 1.65; color: rgba(237,228,208,0.55); font-style: italic; margin-bottom: 1.05rem; }
+
+.ag-section { margin-bottom: 0.38rem; }
+.ag-head { display: flex; align-items: center; gap: 0.68rem; padding: 0.78rem 0.9rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color 0.13s, background 0.12s; user-select: none; }
+.ag-head:hover { border-color: var(--border2); background: var(--panel2); }
+.ag-section.open .ag-head { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom-color: transparent; }
+.ag-num { font-family: 'Lora', serif; font-size: 0.92rem; font-weight: 700; color: var(--brass); min-width: 1.25rem; opacity: 0.85; }
+.ag-title { font-size: 0.85rem; font-weight: 500; color: var(--cream); flex: 1; }
+.ag-chev { color: var(--muted2); font-size: 0.68rem; transition: transform 0.2s, color 0.2s; }
+.ag-section.open .ag-chev { transform: rotate(90deg); color: var(--brass); }
+.ag-body { display: none; background: var(--panel); border: 1px solid var(--border); border-top: none; border-bottom-left-radius: var(--r); border-bottom-right-radius: var(--r); padding: 0.78rem 1rem 0.95rem; }
+.ag-section.open .ag-body { display: block; }
+.ag-h3 { font-size: 0.76rem; font-weight: 600; color: var(--cream); margin: 0.82rem 0 0.26rem; }
+.ag-h3:first-child { margin-top: 0; }
+.ag-p { font-size: 0.77rem; line-height: 1.65; color: rgba(237,228,208,0.6); }
+.ag-p strong { color: var(--cream); font-weight: 500; }
+.ag-contacts { background: rgba(196,154,42,0.04); border: 1px solid rgba(196,154,42,0.11); border-radius: var(--r); padding: 0.82rem 0.9rem; margin-top: 1rem; font-size: 0.75rem; line-height: 1.9; color: var(--muted); }
+.ag-contacts strong { color: var(--cream); font-weight: 500; }
+
+/* ── MORE SHEET ── */
+#more-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); z-index: 40;
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity 0.25s ease;
+}
+#more-overlay.open { opacity: 1; }
+
+#more-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border2);
+  border-radius: 18px 18px 0 0;
+  z-index: 41;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(.22,1,.36,1);
+  /* ensure it never overflows viewport */
+  max-height: 85dvh;
+  overflow-y: auto;
+}
+#more-sheet.open { transform: translateY(0); }
+
+.sheet-handle-wrap { padding: 0.9rem 1rem 0; display: flex; align-items: center; justify-content: center; }
+.sheet-handle { width: 36px; height: 3.5px; background: var(--border2); border-radius: 100px; }
+.sheet-header { padding: 0.6rem 1.1rem 0.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.sheet-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.sheet-close { background: none; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; line-height: 1; padding: 0.2rem; -webkit-tap-highlight-color: transparent; }
+.sheet-close:hover { color: var(--cream); }
+
+.sheet-nav-list {
+  padding: 0.5rem 0.7rem;
+  display: flex; flex-direction: column; gap: 0.2rem;
+  /* bottom padding accounts for safe area + nav bar */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+}
+.sheet-nav-btn { display: flex; align-items: center; gap: 0.85rem; padding: 0.72rem 0.8rem; background: none; border: none; border-radius: var(--r2); cursor: pointer; font-family: 'DM Sans', sans-serif; text-align: left; width: 100%; transition: background 0.12s; -webkit-tap-highlight-color: transparent; }
+.sheet-nav-btn:hover, .sheet-nav-btn:active { background: var(--panel); }
+.sheet-nav-btn.active-item { background: var(--brass-soft); }
+.sheet-nav-icon { font-size: 1.3rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 9px; flex-shrink: 0; }
+.sheet-nav-btn.active-item .sheet-nav-icon { background: rgba(196,154,42,0.18); }
+.sheet-nav-text { flex: 1; }
+.sheet-nav-label { font-size: 0.88rem; font-weight: 500; color: var(--cream); line-height: 1.2; }
+.sheet-nav-btn.active-item .sheet-nav-label { color: var(--brass); }
+.sheet-nav-desc { font-size: 0.66rem; color: var(--muted); margin-top: 0.04rem; }
+.sheet-nav-arrow { color: var(--muted2); font-size: 0.7rem; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 0.8rem);
+  left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--forest); color: white;
+  padding: 0.55rem 1.3rem; border-radius: 100px;
+  font-size: 0.78rem; font-weight: 500;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.25s;
+  z-index: 100; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  /* prevent overflow on small screens */
+  max-width: calc(100vw - 2rem);
+  text-overflow: ellipsis; overflow: hidden;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ── DESKTOP ── */
+@media (min-width: 700px) {
+  body { background: #070708; }
+  .site-header { padding: 1.7rem 2rem 1.5rem; }
+  .layout-wrap { display: flex; max-width: 1000px; margin: 0 auto; min-height: calc(100vh - 82px); padding-top: 0.8rem; }
+  .side-nav { width: 190px; flex-shrink: 0; padding: 0.7rem 0 2rem; position: sticky; top: 0; height: calc(100vh - 82px); overflow-y: auto; display: flex; flex-direction: column; gap: 0.12rem; }
+  .snav-btn { display: flex; align-items: center; gap: 0.68rem; padding: 0.62rem 0.85rem; background: none; border: none; border-radius: var(--r); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 400; color: var(--muted); text-align: left; width: 100%; transition: background 0.12s, color 0.12s; -webkit-tap-highlight-color: transparent; }
+  .snav-btn:hover { background: var(--panel); color: var(--cream); }
+  .snav-btn.active { background: var(--brass-soft); color: var(--brass); font-weight: 600; }
+  .snav-icon { font-size: 0.98rem; flex-shrink: 0; }
+  .snav-divider { height: 1px; background: var(--border); margin: 0.32rem 0.85rem; }
+  .desktop-content { flex: 1; padding: 0.7rem 1.3rem 2rem 1.3rem; min-width: 0; border-left: 1px solid var(--border); max-width: 660px; }
+  .bottom-nav { display: none; }
+  #more-sheet, #more-overlay { display: none !important; }
+  main { padding: 0; max-width: none; }
+}
+@media (max-width: 699px) {
+  .layout-wrap { display: block; }
+  .side-nav { display: none; }
+  .desktop-content { display: block; }
+}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE
+     ✏️ EDIT: Change PASSPHRASE constant in the <script> at the bottom -->
+<div id="gate-overlay">
+  <div class="gate-card">
+    <div class="gate-flame">🔥 🤝 🔥</div>
+    <h1 class="gate-title">The <em>Brooklyn</em><br>Brotherhood</h1>
+    <p class="gate-sub">MKP I-Group · Brooklyn, New York</p>
+    <div class="gate-rule"></div>
+    <div class="gate-lbl">Passphrase</div>
+    <input class="gate-input" id="gate-input" type="password" placeholder="Enter passphrase"
+      autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')checkPassword()">
+    <div class="gate-error" id="gate-error"></div>
+    <button class="gate-btn" onclick="checkPassword()">Enter Brotherhood</button>
+    <p class="gate-hint">Members only · Contact a brother<br>if you need the passphrase</p>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-flame">🔥 🤝 🔥</div>
+  <h1 class="site-title">The <em>Brooklyn</em> Brotherhood</h1>
+  <p class="site-tagline">MKP I-Group · Brooklyn, New York</p>
+</header>
+
+<div class="layout-wrap">
+
+  <!-- DESKTOP SIDEBAR -->
+  <nav class="side-nav">
+    <button class="snav-btn active" onclick="showPane('home')"       id="snav-home">      <span class="snav-icon">🏠</span> Home</button>
+    <button class="snav-btn"        onclick="showPane('members')"    id="snav-members">   <span class="snav-icon">👥</span> Brothers</button>
+    <button class="snav-btn"        onclick="showPane('checklist')"  id="snav-checklist"> <span class="snav-icon">✅</span> Checklist</button>
+    <button class="snav-btn"        onclick="showPane('dues')"       id="snav-dues">      <span class="snav-icon">💵</span> Dues</button>
+    <div class="snav-divider"></div>
+    <button class="snav-btn"        onclick="showPane('docs')"       id="snav-docs">      <span class="snav-icon">📂</span> Documents</button>
+    <button class="snav-btn"        onclick="showPane('calendar')"   id="snav-calendar">  <span class="snav-icon">📅</span> Calendar</button>
+    <button class="snav-btn"        onclick="showPane('kingemail')"  id="snav-kingemail"> <span class="snav-icon">📧</span> King Email</button>
+    <button class="snav-btn"        onclick="showPane('roles')"      id="snav-roles">     <span class="snav-icon">👑</span> Roles</button>
+    <button class="snav-btn"        onclick="showPane('agreements')" id="snav-agreements"><span class="snav-icon">📜</span> Agreements</button>
+  </nav>
+
+  <div class="desktop-content">
+  <main>
+
+  <!-- ══ HOME ══ -->
+  <div id="pane-home" class="tab-pane active">
+    <div class="hero-card">
+      <div class="card-label">Meeting Schedule</div>
+      <div class="schedule-list">
+        <div class="schedule-row"><div class="s-icon">🗓</div><div><div class="s-name">I-Group Meetings</div><div class="s-detail">2nd &amp; 4th Wednesday · 7–9 PM</div></div></div>
+        <div class="schedule-row"><div class="s-icon">🎉</div><div><div class="s-name">Group Social</div><div class="s-detail">1st Wednesday of each month</div></div></div>
+        <div class="schedule-row"><div class="s-icon">📍</div><div><div class="s-name">The Loft at Park Slope Performing Arts</div><div class="s-detail">135 Windsor Pl, Brooklyn, NY 11215</div></div></div>
+      </div>
+    </div>
+    <div class="qa-grid">
+      <button class="qa-btn" onclick="showPane('members')">  <span class="qa-icon">👥</span><span class="qa-label">Brothers</span></button>
+      <button class="qa-btn" onclick="showPane('checklist')"><span class="qa-icon">✅</span><span class="qa-label">Checklist</span></button>
+      <button class="qa-btn" onclick="showPane('dues')">     <span class="qa-icon">💵</span><span class="qa-label">Dues</span></button>
+      <button class="qa-btn" onclick="showPane('kingemail')"><span class="qa-icon">📧</span><span class="qa-label">King Email</span></button>
+      <button class="qa-btn" onclick="showPane('docs')">     <span class="qa-icon">📂</span><span class="qa-label">Docs</span></button>
+      <button class="qa-btn" onclick="showPane('roles')">    <span class="qa-icon">👑</span><span class="qa-label">Roles</span></button>
+    </div>
+    <div class="alert-box">
+      <strong>RSVP Rule:</strong> Declare attendance by <strong>7 PM Sunday</strong> before each meeting via Google Calendar.
+      Fewer than 3 RSVPs = cancelled, announced via WhatsApp. <strong>30+ minutes late = closed meeting.</strong>
+    </div>
+  </div>
+
+  <!-- ══ MEMBERS ══
+       ✏️ EDIT: Update brothers directly in the HTML below.
+       Copy a member-item block to add someone new.
+       Badges: badge-brass = role/admin · badge-forest = treasurer · badge-visitor = visitor
+  ══════════════════ -->
+  <div id="pane-members" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">Brothers</div>
+      <div class="page-sub">Tap to expand</div>
+    </div>
+
+    <div class="member-list">
+
+      <!-- Jeffrey Mason -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">JM</div>
+          <div class="member-meta"><div class="member-name">Jeffrey Mason</div><div class="member-sub">804-714-6243</div></div>
+          <div class="member-badges"><span class="badge badge-brass">Admin</span><span class="badge badge-forest">Treasurer</span></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:8047146243">804-714-6243</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:mason.jeffrey.j@gmail.com">mason.jeffrey.j@gmail.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">1515 Madison Place, Brooklyn, NY 11229</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">November 2</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">Tatyana Popandopulo · <a href="tel:6466840350">646-684-0350</a> (Wife)</div></div>
+          <div class="cp-row"><div class="cp-label">Zelle</div><div class="cp-value" style="color:var(--forest)">Pay dues to 804-714-6243</div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:8047146243">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:8047146243">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:mason.jeffrey.j@gmail.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brian McCrystal -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">BC</div>
+          <div class="member-meta"><div class="member-name">Brian McCrystal</div><div class="member-sub">732-832-6593</div></div>
+          <div class="member-badges"><span class="badge badge-brass">Admin</span></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:7328326593">732-832-6593</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:McCrystalb7@yahoo.com">McCrystalb7@yahoo.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">19 Fiske Pl Apt E1, Brooklyn, NY 11215</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">April 21, 1995</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">Don McCrystal · <a href="tel:2013206611">201-320-6611</a> (Father)</div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:7328326593">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:7328326593">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:McCrystalb7@yahoo.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- David Rubinow -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">DR</div>
+          <div class="member-meta"><div class="member-name">David Rubinow</div><div class="member-sub">310-621-6135</div></div>
+          <div class="member-badges"></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:3106216135">310-621-6135</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:tdpsdru@gmail.com">tdpsdru@gmail.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">1065 Manhattan Ave, Brooklyn, NY 11222</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">February 26, 1973</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">Ruth Russek · <a href="tel:9293021545">929-302-1545</a></div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:3106216135">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:3106216135">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:tdpsdru@gmail.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alexander Khenkin -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">AK</div>
+          <div class="member-meta"><div class="member-name">Alexander Khenkin</div><div class="member-sub">646-234-3503</div></div>
+          <div class="member-badges"></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:6462343503">646-234-3503</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:alkhenkin@gmail.com">alkhenkin@gmail.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">567 Ocean Ave #A106, Brooklyn, NY 11226</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">May 8</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">David Khenkin · <a href="tel:9175867451">917-586-7451</a> (Son)</div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:6462343503">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:6462343503">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:alkhenkin@gmail.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jeff Zeth -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">JZ</div>
+          <div class="member-meta"><div class="member-name">Jeff Zeth</div><div class="member-sub">917-755-9547</div></div>
+          <div class="member-badges"></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:9177559547">917-755-9547</a></div></div>
+          <div class="cp-row"><div class="cp-label">Alt Phone</div><div class="cp-value"><a href="tel:9177453166">917-745-3166</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:jrzeth2@gmail.com">jrzeth2@gmail.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">499 E. 8th St Apt 7C, Brooklyn, NY 11218</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">April 17, 1961</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">Susan Dickerson · <a href="tel:2018935600">201-893-5600</a> (Partner)</div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:9177559547">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:9177559547">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:jrzeth2@gmail.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meli Pil -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">MP</div>
+          <div class="member-meta"><div class="member-name">Meli Pil</div><div class="member-sub">646-256-5166</div></div>
+          <div class="member-badges"></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:6462565166">646-256-5166</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:Melipil5780@gmail.com">Melipil5780@gmail.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">763 Eastern Pkwy A17, Brooklyn, NY 11213</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">May 27, 1997</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">Mattie Pil · <a href="tel:4159334310">415-933-4310</a> (Mother)</div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:6462565166">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:6462565166">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:Melipil5780@gmail.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Andrew Tomasulo -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">AT</div>
+          <div class="member-meta"><div class="member-name">Andrew Tomasulo</div><div class="member-sub">215-570-8000</div></div>
+          <div class="member-badges"></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:2155708000">215-570-8000</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:a@andrewtomasulo.com">a@andrewtomasulo.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">507 E 4th St, Brooklyn, NY 11218</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">May 13, 1975</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">Bhumika Muchhala · <a href="tel:2023806230">202-380-6230</a> (Wife)</div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:2155708000">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:2155708000">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:a@andrewtomasulo.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fred Fernandes -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar">FF</div>
+          <div class="member-meta"><div class="member-name">Fred Fernandes</div><div class="member-sub">917-207-6396</div></div>
+          <div class="member-badges"></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Phone</div><div class="cp-value"><a href="tel:9172076396">917-207-6396</a></div></div>
+          <div class="cp-row"><div class="cp-label">Email</div><div class="cp-value"><a href="mailto:Frederickfernandes2@gmail.com">Frederickfernandes2@gmail.com</a></div></div>
+          <div class="cp-row"><div class="cp-label">Address</div><div class="cp-value">361 Maple St Apt 4B, Brooklyn, NY 11225</div></div>
+          <div class="cp-row"><div class="cp-label">Birthday</div><div class="cp-value">May 16, 2000</div></div>
+          <div class="cp-row"><div class="cp-label">Emergency</div><div class="cp-value">Carolina Mariares · <a href="tel:6467338046">646-733-8046</a> (Partner)</div></div>
+          <div class="member-actions">
+            <a class="member-action-btn action-call"  href="tel:9172076396">📞 Call</a>
+            <a class="member-action-btn action-text"  href="sms:9172076396">💬 Text</a>
+            <a class="member-action-btn action-email" href="mailto:Frederickfernandes2@gmail.com">✉️ Email</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Big Melt (visitor) -->
+      <div class="member-item">
+        <div class="member-row" onclick="this.parentElement.classList.toggle('open')">
+          <div class="avatar avatar-visitor">BG</div>
+          <div class="member-meta"><div class="member-name">Big Melt</div><div class="member-sub" style="font-style:italic">Visitor</div></div>
+          <div class="member-badges"><span class="badge badge-visitor">Visitor</span></div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="contact-panel">
+          <div class="cp-row"><div class="cp-label">Status</div><div class="cp-value">Prospective member — attending meetings</div></div>
+        </div>
+      </div>
+
+    </div><!-- /member-list -->
+  </div>
+
+  <!-- ══ CHECKLIST ══ -->
+  <div id="pane-checklist" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">End of Meeting</div>
+      <div class="page-sub">Before you leave</div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="prog-bar"></div></div>
+    <div class="cl-card">
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Make sure sink is off tight and toilet flush handle isn't stuck in the down position (both prone to drips)</div></div>
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Make sure space heaters and ACs are off</div></div>
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Fold chairs, put against wall</div></div>
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Place benches back against the wall with black boxes underneath</div></div>
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Return cameras to facing in towards the room</div></div>
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Make sure GUTS bag is placed back behind curtain</div></div>
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Lights off</div></div>
+      <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-box">✓</div><div class="cl-text">Lock the door on the way out</div></div>
+    </div>
+    <div class="progress-label" id="prog-label"></div>
+    <button class="btn-ghost" onclick="resetChecklist()">↺ Reset</button>
+  </div>
+
+  <!-- ══ DUES ══
+       ✏️ EDIT: Update treasurer name, phone, and Zelle number below -->
+  <div id="pane-dues" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">Dues</div>
+      <div class="page-sub">Monthly · $35</div>
+    </div>
+    <div class="dues-hero">
+      <div class="dues-label">Monthly Dues</div>
+      <div class="dues-amount">$35</div>
+      <div class="dues-name">Pay to Jeffrey Mason, Treasurer</div>
+    </div>
+    <div class="zelle-row">
+      <div class="zelle-badge">Z</div>
+      <div class="zelle-info">
+        <div class="zl">Zelle · Jeffrey Mason</div>
+        <div class="zv">804-714-6243</div>
+      </div>
+      <button class="btn-copy" onclick="copyText('804-714-6243','Number copied!')">Copy</button>
+    </div>
+    <div class="info-box">Open Zelle in your bank app and send <strong>$35</strong> to <strong>804-714-6243</strong>. Questions? Contact Jeffrey directly.</div>
+    <a href="https://docs.google.com/spreadsheets/d/1Vg4Q5XOnHLcU3-Tt8aLhNmPSI7quKSfLYZ8DrmvA3gw/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-sheet">📊</div>
+      <div class="doc-info"><div class="doc-name">Group Dues and Disbursements 2026</div><div class="doc-desc">View payment records</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+  </div>
+
+  <!-- ══ DOCUMENTS ══
+       ✏️ EDIT: Add or remove doc-link rows below.
+       Icon classes: di-sheet (green) · di-doc (blue) · di-agree (brass) · di-fire (amber) -->
+  <div id="pane-docs" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">Documents</div>
+      <div class="page-sub">Shared files</div>
+    </div>
+
+    <div class="doc-section-label">📊 Spreadsheets</div>
+    <a href="https://docs.google.com/spreadsheets/d/1Vg4Q5XOnHLcU3-Tt8aLhNmPSI7quKSfLYZ8DrmvA3gw/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-sheet">📊</div>
+      <div class="doc-info"><div class="doc-name">Group Dues and Disbursements 2026</div><div class="doc-desc">Google Sheets · Jeffrey Mason</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+    <a href="https://docs.google.com/spreadsheets/d/1kRTLjlJws_WqWDwe7AmFdeeoy4SnNjLNLS2ffdNLbUs/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-sheet">📊</div>
+      <div class="doc-info"><div class="doc-name">Contact &amp; Emergency Contact Information</div><div class="doc-desc">Google Sheets</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+
+    <div class="doc-section-label" style="margin-top:1rem">📄 Documents</div>
+    <a href="https://docs.google.com/document/d/12HqrCqY2IK63cd8ilDliOk0ALpgb0yXbcKdO6u1wNmk/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-doc">📄</div>
+      <div class="doc-info"><div class="doc-name">Attendance and Meeting Notes 2026</div><div class="doc-desc">Google Doc · Secretary maintains</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+    <a href="https://docs.google.com/document/d/1j0Z51erstQkrsnP4TAJ-HS-BIWUtLFEt/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-agree">📜</div>
+      <div class="doc-info"><div class="doc-name">Brooklyn Brotherhood I-Group Agreements</div><div class="doc-desc">Google Doc · Full agreements</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+    <a href="https://docs.google.com/document/d/1Dl5CE_jt_pksSf1zFCMgFKYISQX4qs31PVJARSzuO3M/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-doc">📄</div>
+      <div class="doc-info"><div class="doc-name">For New Members</div><div class="doc-desc">Google Doc · Onboarding guide</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+    <a href="https://docs.google.com/document/d/1xqfyPnSqUv-IK2KLgLO3TZx7VkU_wNBpsMpqGOlxD6A/edit?tab=t.0" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-agree">👑</div>
+      <div class="doc-info"><div class="doc-name">The Role of the King</div><div class="doc-desc">Google Doc · King responsibilities</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+    <a href="https://docs.google.com/document/d/144nGZjB_DQoiHzcHhM7PS6ixqfSc5pPbPXbj80PE2Ks/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-doc">📄</div>
+      <div class="doc-info"><div class="doc-name">King's Sample Email</div><div class="doc-desc">Google Doc · Email template</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+    <a href="https://docs.google.com/document/d/14Hm-7ae5wf2JVHS5zuwUexoVunaz4ady_NYUP2L07io/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-fire">🔥</div>
+      <div class="doc-info"><div class="doc-name">Group Mission</div><div class="doc-desc">Google Doc</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+  </div>
+
+  <!-- ══ CALENDAR ══ -->
+  <div id="pane-calendar" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">Calendar</div>
+      <div class="page-sub">Links &amp; schedule</div>
+    </div>
+    <div class="alert-box" style="margin-bottom:1rem">
+      <strong>RSVP by 7 PM Sunday</strong> before each meeting via Google Calendar.
+      2nd &amp; 4th Wednesday · 7–9 PM · 135 Windsor Pl, Brooklyn
+    </div>
+    <div onclick="showPane('kingemail')" class="cal-link"><div class="cal-icon ci-king">📧</div>Compose King Email</div>
+    <a href="https://calendar.google.com" target="_blank" class="cal-link"><div class="cal-icon ci-gcal">📅</div>Open Google Calendar</a>
+    <a href="https://calendar.google.com/calendar/r/eventedit" target="_blank" class="cal-link"><div class="cal-icon ci-new">➕</div>Create New Calendar Event</a>
+    <a href="https://mail.google.com" target="_blank" class="cal-link"><div class="cal-icon ci-gmail">📧</div>Brotherhood Gmail</a>
+  </div>
+
+  <!-- ══ KING EMAIL ══ -->
+  <div id="pane-kingemail" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">King Email</div>
+      <div class="page-sub">Secretary tool</div>
+    </div>
+
+    <div class="secretary-steps">
+      <div class="card-label">📋 Secretary — Before Each Meeting</div>
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text">Create the Google Calendar event via <strong>thebrooklynbrotherhood@gmail.com</strong> and add all brothers + confirmed guests.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text">Fill in meeting details below. Add guest emails if anyone is invited.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-text">Tap <strong>"Send Email"</strong> — on mobile it copies the email and opens your mail app so you can paste and send. On desktop use "Open in Gmail."</div>
+      </div>
+      <div class="step-note">
+        <span>📬</span>
+        <div class="step-note-text">Sends to the I-Group listserv (all members) + any guests you added. <em>thebrooklynbrotherhood@gmail.com</em> is the sending account — not a recipient.</div>
+      </div>
+    </div>
+
+    <div class="k-form">
+      <div class="k-section-title">Meeting Details</div>
+      <div class="field-row">
+        <div class="field"><label>Meeting Date</label><input type="date" id="ke-date" oninput="updatePreview()"></div>
+        <div class="field"><label>King's Name</label><input type="text" id="ke-king" placeholder="e.g. Jeffrey" oninput="updatePreview()"></div>
+      </div>
+      <div class="field"><label>Theme / Title</label><input type="text" id="ke-theme" placeholder="e.g. The Magician: Owning Your Gold" oninput="updatePreview()"></div>
+      <div class="field">
+        <label>This Week's Agenda <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(one item per line)</span></label>
+        <textarea id="ke-agenda" rows="3" placeholder="- Accountability (Warrior)&#10;- Clearing (Warrior)&#10;- Owning Your Gold (Magician)" oninput="updatePreview()"></textarea>
+      </div>
+      <div class="field">
+        <label>Guest Emails <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(comma-separated, if any)</span></label>
+        <input type="text" id="ke-guests" placeholder="guest@email.com, another@email.com" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Additional Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span></label>
+        <textarea id="ke-notes" rows="2" placeholder="e.g. Please print attached processes, bring notebook…" oninput="updatePreview()"></textarea>
+      </div>
+    </div>
+
+    <div class="k-section-title" style="margin-bottom:.75rem">Email Preview <span style="flex:1;height:1px;background:var(--border);display:block;margin-left:.48rem"></span></div>
+
+    <div class="email-preview">
+      <div class="email-preview-header">
+        <div class="email-preview-label">
+          To: brooklynbrotherhood-igroup@mkpconnect.org
+          <span id="ke-guests-label" style="color:var(--brass);opacity:.8"></span>
+        </div>
+        <div class="email-preview-subject" id="ke-subject">Brooklyn Brotherhood — [Fill in date above]</div>
+      </div>
+      <div class="email-preview-body" id="ke-body">Fill in the meeting details above to preview the email.</div>
+    </div>
+
+    <!-- Share status feedback -->
+    <div class="share-status" id="share-status">
+      ✅ Email copied to clipboard — open your mail app and paste
+    </div>
+
+    <div class="email-actions">
+      <button class="email-btn email-btn-primary" id="send-btn" onclick="handleSend()">
+        📧 Send Email
+      </button>
+      <button class="email-btn email-btn-secondary" onclick="openGmailWeb()">
+        🌐 Open in Gmail (desktop)
+      </button>
+    </div>
+    <p class="email-hint" id="send-hint">
+      Tap "Send Email" — it will open your mail app with everything ready.
+    </p>
+
+    <div class="divider"></div>
+    <a href="https://docs.google.com/document/d/1xqfyPnSqUv-IK2KLgLO3TZx7VkU_wNBpsMpqGOlxD6A/edit?tab=t.0" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-agree">👑</div>
+      <div class="doc-info"><div class="doc-name">The Role of the King</div><div class="doc-desc">Google Doc · Full responsibilities</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+    <a href="https://docs.google.com/document/d/144nGZjB_DQoiHzcHhM7PS6ixqfSc5pPbPXbj80PE2Ks/edit" target="_blank" class="doc-link">
+      <div class="doc-icon-wrap di-doc">📄</div>
+      <div class="doc-info"><div class="doc-name">King's Sample Email</div><div class="doc-desc">Google Doc · Full template reference</div></div>
+      <span class="doc-arrow">↗</span>
+    </a>
+  </div>
+
+  <!-- ══ ROLES ══
+       ✏️ EDIT: Update "Current:" holders when roles change.
+       Mark vacant with: <span class="role-vacant">Vacant — stepping up at next quarter</span> -->
+  <div id="pane-roles" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">Roles</div>
+      <div class="page-sub">Responsibilities &amp; terms</div>
+    </div>
+    <div class="info-box">At each quarter's final meeting, a new man steps up for any expiring roles.</div>
+
+    <div class="role-card">
+      <div class="role-header"><div class="role-name">👑 King</div><div class="role-term">Per meeting</div></div>
+      <div class="role-desc">Leads each meeting. During the Business Round, asks for a volunteer for the next meeting. If no one steps up, selects someone. Sends the King email to the group by end-of-day Saturday before the meeting.</div>
+      <a href="https://docs.google.com/document/d/1xqfyPnSqUv-IK2KLgLO3TZx7VkU_wNBpsMpqGOlxD6A/edit?tab=t.0" target="_blank" style="display:inline-flex;align-items:center;gap:.28rem;font-size:.7rem;color:var(--brass);margin-top:.48rem;text-decoration:none">📄 Full Role Description ↗</a>
+    </div>
+
+    <div class="role-card">
+      <div class="role-header"><div class="role-name">💰 Treasurer</div><div class="role-term">6-month term</div></div>
+      <div class="role-desc">Collects dues by the 1st of each month. Maintains the Dues and Disbursements spreadsheet. Pays for meeting room. Shares fund updates when requested.</div>
+      <!-- ✏️ EDIT: Update name -->
+      <div class="role-holder">👤 Current: <span class="role-holder-name">Jeffrey Mason</span></div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-header"><div class="role-name">🎉 Social Coordinator</div><div class="role-term">3-month term</div></div>
+      <div class="role-desc">Plans monthly social events on the first Wednesday of each month. Makes all final decisions on activities, handles reservations, and communicates details by Saturday before each event.</div>
+      <!-- ✏️ EDIT: Update name -->
+      <div class="role-holder">👤 Current: <span class="role-vacant">Vacant — stepping up at next quarter</span></div>
+    </div>
+
+    <div class="role-card" style="border-color:rgba(196,154,42,0.18)">
+      <div class="role-header"><div class="role-name">📋 Secretary</div><div class="role-term">3-month term</div></div>
+      <div class="role-desc" style="color:rgba(237,228,208,0.72)">
+        The Secretary owns the meeting logistics pipeline.<br><br>
+        <strong style="color:var(--cream)">Before each meeting:</strong><br>
+        ① Create the calendar event via <strong style="color:var(--cream)">thebrooklynbrotherhood@gmail.com</strong> and add all brothers + confirmed guests.<br>
+        ② Use the <strong style="color:var(--cream)">King Email</strong> tab to prepare and send the meeting email.<br><br>
+        <strong style="color:var(--cream)">After each meeting:</strong><br>
+        ③ Take attendance and notes in the <a href="https://docs.google.com/document/d/12HqrCqY2IK63cd8ilDliOk0ALpgb0yXbcKdO6u1wNmk/edit" target="_blank" style="color:var(--brass)">Attendance and Meeting Notes 2026</a> document.
+      </div>
+      <button onclick="showPane('kingemail')" style="margin-top:.52rem;display:inline-flex;align-items:center;gap:.28rem;background:var(--brass-soft);border:1px solid rgba(196,154,42,.26);border-radius:4px;padding:.3rem .72rem;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;color:var(--brass);cursor:pointer;letter-spacing:.06em;-webkit-tap-highlight-color:transparent">📧 Go to King Email Tool</button>
+      <!-- ✏️ EDIT: Update name -->
+      <div class="role-holder" style="margin-top:.52rem">👤 Current: <span class="role-vacant">Vacant — stepping up at next quarter</span></div>
+    </div>
+
+    <div class="role-card">
+      <div class="role-header"><div class="role-name">🔗 I-Group Representative</div><div class="role-term">No term limit</div></div>
+      <div class="role-desc">Manages the group's MKP email listserv (<strong style="color:var(--cream)">brooklynbrotherhood-igroup@mkpconnect.org</strong>). Books the meeting space and communicates with MKP administration. Sends written notice of any agreement changes.</div>
+      <!-- ✏️ EDIT: Update name -->
+      <div class="role-holder">👤 Current: <span class="role-vacant">Vacant — stepping up at next quarter</span></div>
+    </div>
+  </div>
+
+  <!-- ══ AGREEMENTS ══ -->
+  <div id="pane-agreements" class="tab-pane">
+    <div class="page-header">
+      <div class="page-title">Agreements</div>
+      <div class="page-sub">Brooklyn Brotherhood I-Group</div>
+    </div>
+    <a href="https://docs.google.com/document/d/1j0Z51erstQkrsnP4TAJ-HS-BIWUtLFEt/edit" target="_blank" class="full-doc-btn">📜 Open Full Agreements Doc</a>
+    <p class="intro-text">By committing to these agreements, each man is "taking a seat at the table" — building a strong container based on shared MKP values.</p>
+
+    <div class="ag-section" id="ag1">
+      <div class="ag-head" onclick="toggleAg('ag1')"><span class="ag-num">1</span><span class="ag-title">Guiding Principles</span><span class="ag-chev">›</span></div>
+      <div class="ag-body">
+        <div class="ag-h3">1.1 MKP Code of Ethics</div>
+        <p class="ag-p">Men are expected to uphold Confidentiality, Punctuality, Ethical Relationships, Non-Violence, and Prohibition of Drugs or Alcohol. If a man is under the influence, he will inform the group and accept any decision regarding his continued presence.</p>
+        <div class="ag-h3">1.2 Brotherhood Guiding Principles</div>
+        <p class="ag-p">Creating a safe and sacred space for men to share, grow, and be seen · Fostering brotherhood, trust, and accountability · Developing leadership skills and deeper connections · Building a diverse and inclusive community that supports each other's healing and growth.</p>
+      </div>
+    </div>
+
+    <div class="ag-section" id="ag2">
+      <div class="ag-head" onclick="toggleAg('ag2')"><span class="ag-num">2</span><span class="ag-title">Attendance &amp; Membership</span><span class="ag-chev">›</span></div>
+      <div class="ag-body">
+        <div class="ag-h3">2.1 Welcoming Period</div>
+        <p class="ag-p">Complete an NWTA weekend, agree to these agreements, attend 3 meetings + 1 social within 3 months. A <strong>unanimous vote</strong> is required. Only 1 brand-new guest per meeting; they must have had a screening call with a standing member first.</p>
+        <div class="ag-h3">2.2 Membership Cap</div>
+        <p class="ag-p">Capped at <strong>12 members</strong>. If the cap is reached, the group is "closed" — no new guests or members until a spot opens.</p>
+        <div class="ag-h3">2.3 Dues</div>
+        <p class="ag-p"><strong>$35/month</strong> due to the Treasurer by the 1st. Men on a leave of absence (2+ months) are not expected to pay.</p>
+        <div class="ag-h3">2.4 RSVPs &amp; Punctuality</div>
+        <p class="ag-p">RSVP by <strong>7 PM Sunday</strong> prior to each meeting via Google Calendar. <strong>Meeting is closed for men arriving 30+ minutes late.</strong> After 2 months of no attendance without a leave of absence, the man's seat is given up.</p>
+      </div>
+    </div>
+
+    <div class="ag-section" id="ag3">
+      <div class="ag-head" onclick="toggleAg('ag3')"><span class="ag-num">3</span><span class="ag-title">Meeting Logistics</span><span class="ag-chev">›</span></div>
+      <div class="ag-body">
+        <div class="ag-h3">Location, Date &amp; Time</div>
+        <p class="ag-p">The Loft at Park Slope Performing Arts · 135 Windsor Pl, Brooklyn, NY 11215 · 2nd &amp; 4th Wednesdays · 7–9 PM. We are still responsible for paying for the room even if a meeting is cancelled due to low RSVPs.</p>
+        <div class="ag-h3">Group Socials</div>
+        <p class="ag-p">First Wednesday of each month, planned by the Social Coordinator. Open to core members, men in their welcoming period, and invited guests.</p>
+        <div class="ag-h3">Cancellations</div>
+        <p class="ag-p">Fewer than 3 RSVPs = meeting cancelled, announced via WhatsApp.</p>
+      </div>
+    </div>
+
+    <div class="ag-section" id="ag4">
+      <div class="ag-head" onclick="toggleAg('ag4')"><span class="ag-num">4</span><span class="ag-title">Roles &amp; Responsibilities</span><span class="ag-chev">›</span></div>
+      <div class="ag-body">
+        <div class="ag-h3">Facilitation</div>
+        <p class="ag-p">Upon accepting the role of facilitator for another man's work, only that man may perform that role. The facilitator may request support. All other men present must hold sacred space.</p>
+        <div class="ag-h3">King for Each Meeting</div>
+        <p class="ag-p">The King emails the group by end-of-day Saturday. The Secretary prepares the email. At the Business Round, the King requests a volunteer for the next meeting; if no one steps up, the King selects someone.</p>
+        <div class="ag-h3">Administrative Roles</div>
+        <p class="ag-p">Terms span several months. At the final meeting of each quarter, a new man steps up for any expiring roles.</p>
+      </div>
+    </div>
+
+    <div class="ag-section" id="ag5">
+      <div class="ag-head" onclick="toggleAg('ag5')"><span class="ag-num">5</span><span class="ag-title">Amendments &amp; Minor Edits</span><span class="ag-chev">›</span></div>
+      <div class="ag-body">
+        <div class="ag-h3">Amendments</div>
+        <p class="ag-p">Changes that affect group functioning require a majority vote (&gt;50%) in person or electronically (WhatsApp, Google Forms).</p>
+        <div class="ag-h3">Minor Edits</div>
+        <p class="ag-p">Changes that don't affect functioning may occur without a vote, but must be discussed with the I-Group Representative first. The I-Group Rep sends written notice to the group.</p>
+      </div>
+    </div>
+
+    <div class="ag-contacts">
+      <strong>Sending account:</strong> thebrooklynbrotherhood@gmail.com<br>
+      <strong>I-Group listserv:</strong> brooklynbrotherhood-igroup@mkpconnect.org
+    </div>
+  </div>
+
+  </main>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bnav-btn active" onclick="showPane('home')"      id="nav-home">     <span class="nav-icon">🏠</span>Home</button>
+  <button class="bnav-btn"        onclick="showPane('members')"   id="nav-members">  <span class="nav-icon">👥</span>Brothers</button>
+  <button class="bnav-btn"        onclick="showPane('kingemail')" id="nav-kingemail"><span class="nav-icon">📧</span>King</button>
+  <button class="bnav-btn"        onclick="showPane('dues')"      id="nav-dues">     <span class="nav-icon">💵</span>Dues</button>
+  <button class="bnav-btn"        onclick="openMore()"            id="nav-more">     <span class="nav-icon">☰</span>More</button>
+</nav>
+
+<!-- MORE SHEET -->
+<div id="more-overlay" onclick="closeMore()"></div>
+<div id="more-sheet">
+  <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+  <div class="sheet-header">
+    <span class="sheet-title">More</span>
+    <button class="sheet-close" onclick="closeMore()">✕</button>
+  </div>
+  <div class="sheet-nav-list">
+    <button class="sheet-nav-btn" id="sm-checklist" onclick="showPane('checklist');closeMore()">
+      <div class="sheet-nav-icon">✅</div>
+      <div class="sheet-nav-text"><div class="sheet-nav-label">End of Meeting Checklist</div><div class="sheet-nav-desc">Things to do before leaving</div></div>
+      <span class="sheet-nav-arrow">›</span>
+    </button>
+    <button class="sheet-nav-btn" id="sm-docs" onclick="showPane('docs');closeMore()">
+      <div class="sheet-nav-icon">📂</div>
+      <div class="sheet-nav-text"><div class="sheet-nav-label">Documents</div><div class="sheet-nav-desc">Google Docs, Sheets, and files</div></div>
+      <span class="sheet-nav-arrow">›</span>
+    </button>
+    <button class="sheet-nav-btn" id="sm-calendar" onclick="showPane('calendar');closeMore()">
+      <div class="sheet-nav-icon">📅</div>
+      <div class="sheet-nav-text"><div class="sheet-nav-label">Calendar</div><div class="sheet-nav-desc">Schedule and meeting links</div></div>
+      <span class="sheet-nav-arrow">›</span>
+    </button>
+    <button class="sheet-nav-btn" id="sm-roles" onclick="showPane('roles');closeMore()">
+      <div class="sheet-nav-icon">👑</div>
+      <div class="sheet-nav-text"><div class="sheet-nav-label">Roles</div><div class="sheet-nav-desc">Current holders and terms</div></div>
+      <span class="sheet-nav-arrow">›</span>
+    </button>
+    <button class="sheet-nav-btn" id="sm-agreements" onclick="showPane('agreements');closeMore()">
+      <div class="sheet-nav-icon">📜</div>
+      <div class="sheet-nav-text"><div class="sheet-nav-label">Agreements</div><div class="sheet-nav-desc">Group rules and commitments</div></div>
+      <span class="sheet-nav-arrow">›</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  ✏️ EDIT: Change the passphrase here
+// ═══════════════════════════════════════════
+const PASSPHRASE = 'brooklyn';
+
+// ── PASSWORD GATE ────────────────────────
+function checkPassword() {
+  var input = document.getElementById('gate-input');
+  var error = document.getElementById('gate-error');
+  if (input.value.trim().toLowerCase() === PASSPHRASE.toLowerCase()) {
+    sessionStorage.setItem('bbb_auth', '1');
+    document.getElementById('gate-overlay').classList.add('unlocked');
+    input.blur();
+  } else {
+    input.classList.remove('shake');
+    void input.offsetWidth;
+    input.classList.add('shake');
+    error.textContent = 'Incorrect passphrase — try again';
+    input.value = '';
+    setTimeout(function() { input.classList.remove('shake'); }, 400);
+  }
+}
+if (sessionStorage.getItem('bbb_auth') === '1') {
+  document.getElementById('gate-overlay').classList.add('unlocked');
+}
+
+// ── NAVIGATION ───────────────────────────
+var PANES      = ['home','members','checklist','dues','docs','calendar','kingemail','roles','agreements'];
+var MORE_PANES = {'checklist':1,'docs':1,'calendar':1,'roles':1,'agreements':1};
+var MAIN_NAV   = {'home':'home','members':'members','kingemail':'kingemail','dues':'dues'};
+
+function showPane(name) {
+  for (var i = 0; i < PANES.length; i++) {
+    var el = document.getElementById('pane-' + PANES[i]);
+    if (el) el.classList.remove('active');
+  }
+  var pane = document.getElementById('pane-' + name);
+  if (pane) pane.classList.add('active');
+
+  document.querySelectorAll('.bnav-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (MORE_PANES[name]) {
+    var mb = document.getElementById('nav-more');
+    if (mb) mb.classList.add('active');
+  } else {
+    var k = MAIN_NAV[name];
+    if (k) { var nb = document.getElementById('nav-' + k); if (nb) nb.classList.add('active'); }
+  }
+
+  document.querySelectorAll('.snav-btn').forEach(function(b) { b.classList.remove('active'); });
+  var sb = document.getElementById('snav-' + name);
+  if (sb) sb.classList.add('active');
+
+  document.querySelectorAll('.sheet-nav-btn').forEach(function(b) { b.classList.remove('active-item'); });
+  var smb = document.getElementById('sm-' + name);
+  if (smb) smb.classList.add('active-item');
+
+  window.scrollTo(0, 0);
+}
+
+// ── MORE SHEET ───────────────────────────
+var moreOpen = false;
+
+function openMore() {
+  var ov = document.getElementById('more-overlay');
+  var sh = document.getElementById('more-sheet');
+  ov.style.display = 'block';
+  sh.style.display = 'block';
+  // force reflow before adding class so transition fires
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      ov.classList.add('open');
+      sh.classList.add('open');
+    });
+  });
+  moreOpen = true;
+  document.getElementById('nav-more').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMore() {
+  var ov = document.getElementById('more-overlay');
+  var sh = document.getElementById('more-sheet');
+  ov.classList.remove('open');
+  sh.classList.remove('open');
+  moreOpen = false;
+  document.body.style.overflow = '';
+  setTimeout(function() {
+    if (!moreOpen) {
+      ov.style.display = 'none';
+      sh.style.display = 'none';
+    }
+  }, 320);
+}
+
+// ── CHECKLIST ────────────────────────────
+function toggleCheck(el) { el.classList.toggle('done'); updateProgress(); }
+
+function updateProgress() {
+  var all  = document.querySelectorAll('.cl-item').length;
+  var done = document.querySelectorAll('.cl-item.done').length;
+  document.getElementById('prog-bar').style.width = (done / all * 100) + '%';
+  var lbl = document.getElementById('prog-label');
+  if (done === all)    { lbl.textContent = '🎉 All done — safe to leave!'; lbl.style.color = 'var(--forest)'; }
+  else if (done === 0) { lbl.textContent = ''; }
+  else                 { lbl.textContent = done + ' of ' + all + ' complete'; lbl.style.color = 'var(--muted)'; }
+}
+
+function resetChecklist() {
+  document.querySelectorAll('.cl-item').forEach(function(i) { i.classList.remove('done'); });
+  document.getElementById('prog-bar').style.width = '0%';
+  document.getElementById('prog-label').textContent = '';
+}
+
+// ── AGREEMENTS ───────────────────────────
+function toggleAg(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+// ── KING EMAIL ───────────────────────────
+function fmtDate(s) {
+  if (!s) return '[Date not set]';
+  var d = new Date(s + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+}
+
+function buildBody() {
+  var date  = fmtDate(document.getElementById('ke-date').value);
+  var king  = document.getElementById('ke-king').value.trim()  || '[King]';
+  var theme = document.getElementById('ke-theme').value.trim() || '[Theme TBD]';
+  var agRaw = document.getElementById('ke-agenda').value.trim();
+  var notes = document.getElementById('ke-notes').value.trim();
+
+  var agLines = agRaw
+    ? agRaw.split('\n').map(function(l) { l = l.trim(); return '  ' + (l.charAt(0) === '-' ? l : '- ' + l); }).filter(function(l) { return l.trim().length > 1; }).join('\n')
+    : '  - Accountability (Warrior)\n  - Clearing (Warrior)\n  - Personal Work (Magician)';
+
+  var b = 'Greetings brothers,\n\nAfter reading the entire email, please mark the Group\'s Google Calendar with a Yes to show that you\'re in!\n\nWith love,\n' + king + '\n\n';
+  b += '────────────────────────\n\nMEETING DETAILS\n\n';
+  b += 'Date:     ' + date + '\n';
+  b += 'Time:     7:00 PM – 9:00 PM\n';
+  b += 'Location: The Loft at Park Slope Performing Arts\n          135 Windsor Pl, Brooklyn, NY 11215\n\n';
+  b += 'Theme:    ' + theme + '\n\n';
+  b += 'This Week\'s Agenda:\n' + agLines + '\n';
+  if (notes) b += '\n────────────────────────\n\n' + notes + '\n';
+  b += '\n────────────────────────\n\nReminder: RSVP by 7 PM Sunday via Google Calendar.\nMeeting is closed for men arriving 30+ minutes late.\n\nIn brotherhood,\nThe Brooklyn Brotherhood';
+  return b;
+}
+
+function buildSubject() {
+  var d = fmtDate(document.getElementById('ke-date').value);
+  var t = document.getElementById('ke-theme').value.trim();
+  return 'Brooklyn Brotherhood — ' + d + (t ? ': ' + t : '');
+}
+
+function getRecipients() {
+  var gRaw = (document.getElementById('ke-guests').value || '').trim();
+  var list = ['brooklynbrotherhood-igroup@mkpconnect.org'];
+  if (gRaw) {
+    gRaw.split(',').forEach(function(g) { g = g.trim(); if (g) list.push(g); });
+  }
+  return list;
+}
+
+function updatePreview() {
+  document.getElementById('ke-subject').textContent = buildSubject();
+  document.getElementById('ke-body').textContent    = buildBody();
+  var gv = (document.getElementById('ke-guests').value || '').trim();
+  document.getElementById('ke-guests-label').textContent = gv ? '+ ' + gv.split(',').length + ' guest(s)' : '';
+  // hide status if user is editing again
+  document.getElementById('share-status').classList.remove('visible');
+}
+
+// Detect iOS/Android for hint text
+var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+if (isMobile) {
+  document.getElementById('send-hint').textContent = 'On iPhone/Android: taps "Send Email" copies the email body, then opens your mail app — just paste and send.';
+} else {
+  document.getElementById('send-hint').textContent = 'On desktop: use "Open in Gmail." On mobile: "Send Email" copies the body and opens your mail app.';
+}
+
+function showShareStatus(msg) {
+  var el = document.getElementById('share-status');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+// Main send handler — tries Web Share API first, falls back to clipboard + mailto
+function handleSend() {
+  var subject = buildSubject();
+  var body    = buildBody();
+  var recipients = getRecipients();
+  var toStr   = recipients.join(', ');
+
+  // Full text to share/copy (includes To and Subject for context)
+  var shareText = 'To: ' + toStr + '\nSubject: ' + subject + '\n\n' + body;
+
+  // Try Web Share API (works on iOS Safari, Chrome Android — native share sheet)
+  if (navigator.share) {
+    navigator.share({
+      title: subject,
+      text: shareText
+    }).then(function() {
+      showShareStatus('✅ Shared successfully');
+    }).catch(function(err) {
+      // User cancelled or share failed — fall back silently to clipboard
+      if (err.name !== 'AbortError') {
+        fallbackCopyAndOpen(subject, body, recipients);
+      }
+    });
+    return;
+  }
+
+  // No Web Share API (most desktop browsers, some Android) — copy + open mailto
+  fallbackCopyAndOpen(subject, body, recipients);
+}
+
+function fallbackCopyAndOpen(subject, body, recipients) {
+  var toStr = recipients.join(',');
+
+  // Copy body to clipboard
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(body).then(function() {
+      showShareStatus('📋 Email body copied — paste it in your mail app after it opens');
+      // Then try to open mailto (may or may not populate body depending on OS)
+      openMailto(subject, body, toStr);
+    }).catch(function() {
+      // Clipboard failed too — just open mailto
+      openMailto(subject, body, toStr);
+      showShareStatus('📧 Mail app opening — fill in the body from the preview above');
+    });
+  } else {
+    // No clipboard API
+    openMailto(subject, body, toStr);
+    showShareStatus('📧 Mail app opening — fill in the body from the preview above');
+  }
+}
+
+function openMailto(subject, body, toStr) {
+  // mailto: is the most universal — works on iOS Mail, Gmail app, Outlook etc.
+  // Body may be stripped on some iOS versions; clipboard handles that case.
+  var url = 'mailto:' + encodeURIComponent(toStr)
+    + '?subject=' + encodeURIComponent(subject)
+    + '&body='    + encodeURIComponent(body);
+  window.location.href = url;
+}
+
+function openGmailWeb() {
+  var to      = encodeURIComponent(getRecipients().join(','));
+  var subject = encodeURIComponent(buildSubject());
+  var body    = encodeURIComponent(buildBody());
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + to + '&su=' + subject + '&body=' + body, '_blank');
+}
+
+// ── UTILITIES ────────────────────────────
+function copyText(text, msg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() { showToast(msg || 'Copied!'); });
+  } else {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); showToast(msg || 'Copied!'); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2400);
+}
+
+// ── INIT ─────────────────────────────────
+updatePreview();
+</script>
+</body>
+</html>
